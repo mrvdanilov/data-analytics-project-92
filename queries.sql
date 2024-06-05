@@ -21,7 +21,7 @@ employee_id и product_id соответственно на "таблицу фа
 */
 
 SELECT
-    CONCAT(e.first_name, ' ', e.last_name) AS seller,
+    (e.first_name || ' ' || e.last_name) AS seller,
     COUNT(s.*) AS operations,
     FLOOR(SUM(p.price * s.quantity)) AS income
 FROM sales AS s
