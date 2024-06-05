@@ -19,14 +19,12 @@ employee_id и product_id соответственно на "таблицу фа
 цены конкретного продукта на его количество. Группируем информацию по
 продавцам через GROUP BY, отображаем по убыванию выручки.
 */
-
 WITH sellers AS (
     SELECT
         e.employee_id AS seller_id,
         (e.first_name || ' ' || e.last_name) AS seller
     FROM employees AS e
 )
-
 SELECT
     sellers.seller,
     COUNT(*) AS operations,
@@ -75,9 +73,9 @@ UPD: сортировка была некорректна, т.к. приводи
 */
 
 SELECT
-	CONCAT(e.first_name,' ', e.last_name) AS seller,
-	to_char(s.sale_date, 'day') AS day_of_week,
-	FLOOR(sum(p.price * s.quantity)) AS income
+CONCAT(e.first_name,' ', e.last_name) AS seller,
+to_char(s.sale_date, 'day') AS day_of_week,
+FLOOR(sum(p.price * s.quantity)) AS income
 FROM sales s
 	LEFT JOIN employees e
 ON e.employee_id = s.sales_person_id 
