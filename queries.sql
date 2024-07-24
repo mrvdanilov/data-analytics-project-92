@@ -1,102 +1,98 @@
-SELECT COUNT(DISTINCT customer_id) AS "customers_count"
-FROM customers;
-
-WITH sellers AS (
-    SELECT
-        e.employee_id AS seller_id,
-        (e.first_name || ' ' || e.last_name) AS seller
-    FROM employees AS e
-)
-SELECT
-    sellers.seller,
-    COUNT(*) AS operations,
-    FLOOR(SUM(s.quantity * p.price)) AS income
-FROM sellers
-INNER JOIN sales AS s ON sellers.seller_id = s.sales_person_id
-INNER JOIN products AS p ON s.product_id = p.product_id
-GROUP BY 1 ORDER BY 3 DESC
-LIMIT 10;
+--top_10_total_income
 
 SELECT
-    CONCAT(e.first_name, ' ', e.last_name) AS seller,
-    FLOOR(AVG(p.price * s.quantity)) AS average_income
-FROM sales AS s
-LEFT JOIN employees AS e
-    ON s.sales_person_id = e.employee_id
-LEFT JOIN products AS p
-    ON s.product_id = p.product_id
-GROUP BY seller
+    --use CONCAT for connect first and last name
+    CONCAT(employees.first_name, ' ', employees.last_name) AS seller,
+    COUNT(sales.sales_id) AS operations, --use COUNT for quantify operations
+    --use SUM for find income and FLOOR for round up to integers
+    FLOOR(SUM(sales.quantity * products.price)) AS income
+FROM employees
+INNER JOIN sales ON employees.employee_id = sales.sales_person_id
+INNER JOIN products ON sales.product_id = products.product_id
+GROUP BY CONCAT(employees.first_name, ' ', employees.last_name)
+ORDER BY income DESC --filtrate income by descending
+LIMIT 10; --use limit for find only 10 empolyeers
+
+--lowest_average_income
+
+SELECT
+    CONCAT(employees.first_name, ' ', employees.last_name) AS seller,
+    FLOOR(AVG(sales.quantity * products.price)) AS avg_income
+FROM sales
+INNER JOIN employees
+    ON sales.sales_person_id = employees.employee_id
+INNER JOIN products
+    ON sales.product_id = products.product_id
+GROUP BY CONCAT(employees.first_name, ' ', employees.last_name)
 HAVING
-    FLOOR(AVG(p.price * s.quantity)) < (
-        SELECT FLOOR(AVG(p.price * s.quantity))
-        FROM sales AS s
-        LEFT JOIN products AS p
-            ON s.product_id = p.product_id
+    FLOOR(AVG(sales.quantity * products.price)) < (
+        SELECT FLOOR(AVG(sales.quantity * products.price)) AS avg_income
+        FROM sales
+        INNER JOIN products ON sales.product_id = products.product_id
     )
-ORDER BY average_income ASC;
+ORDER BY FLOOR(AVG(sales.quantity * products.price)) ASC;
+
+--day_of_the_week_income
 
 SELECT
-	CONCAT(e.first_name,' ', e.last_name) AS seller,
-	to_char(s.sale_date, 'day') AS day_of_week,
-	FLOOR(sum(p.price * s.quantity)) AS income
-FROM sales s
-	LEFT JOIN employees e
-ON e.employee_id = s.sales_person_id 
-	LEFT JOIN products p
-ON s.product_id = p.product_id
-GROUP BY seller, day_of_week, to_char(s.sale_date, 'ID')
-ORDER BY to_char(s.sale_date, 'ID'), seller;
+    --find seller with CONCAT
+    CONCAT(employees.first_name, ' ', employees.last_name) AS seller,
+    --use the LOWER to lowercase
+    LOWER(TO_CHAR(sales.sale_date, 'Day')) AS day_of_week,
+    --use FLOOR for round up to integers
+    FLOOR(SUM(sales.quantity * products.price)) AS income,
+    EXTRACT(ISODOW FROM sales.sale_date) AS sale_date1
+FROM sales
+INNER JOIN employees ON sales.sales_person_id = employees.employee_id
+INNER JOIN products ON sales.product_id = products.product_id
+GROUP BY seller, day_of_week, sale_date1
+ORDER BY sale_date1, seller;
+
+--age_groups
 
 SELECT
-    CASE
+    CASE --create categorys
         WHEN age BETWEEN 16 AND 25 THEN '16-25'
         WHEN age BETWEEN 26 AND 40 THEN '26-40'
         ELSE '40+'
     END AS age_category,
     COUNT(*) AS age_count
 FROM customers
-GROUP BY age_category
-ORDER BY age_category;
+GROUP BY
+    CASE
+        WHEN age BETWEEN 16 AND 25 THEN '16-25'
+        WHEN age BETWEEN 26 AND 40 THEN '26-40'
+        ELSE '40+'
+    END
+ORDER BY CASE
+    WHEN age BETWEEN 16 AND 25 THEN '16-25'
+    WHEN age BETWEEN 26 AND 40 THEN '26-40'
+    ELSE '40+'
+END;
+
+--customers_by_month
 
 SELECT
-    TO_CHAR(s.sale_date, 'YYYY-MM') AS selling_month,
-    COUNT(DISTINCT s.customer_id) AS total_customers,
-    FLOOR(SUM(p.price * s.quantity)) AS income
-FROM sales AS s
-LEFT JOIN customers AS c
-    ON s.customer_id = c.customer_id
-LEFT JOIN products AS p
-    ON s.product_id = p.product_id
-GROUP BY selling_month
-ORDER BY selling_month ASC;
+    --use TO_CHAR for extract year and month
+    TO_CHAR(sales.sale_date, 'YYYY-MM') AS selling_month,
+    COUNT(DISTINCT sales.customer_id) AS total_customers, --count customers
+    --use SUM for find income and TRUNC for round up to integers
+    SUM(TRUNC(sales.quantity * products.price)) AS income
+FROM sales
+INNER JOIN products ON sales.product_id = products.product_id
+GROUP BY TO_CHAR(sales.sale_date, 'YYYY-MM')
+ORDER BY TO_CHAR(sales.sale_date, 'YYYY-MM') ASC; --prioritize
 
-WITH initial_table AS (
-    SELECT
-        CONCAT(c.first_name, ' ', c.last_name) AS customer,
-        FIRST_VALUE(s.sale_date)
-            OVER (PARTITION BY c.customer_id ORDER BY s.sale_date)
-        AS sale_date,
-        CONCAT(e.first_name, ' ', e.last_name) AS seller,
-        FIRST_VALUE(p.price)
-            OVER (
-                PARTITION BY c.customer_id ORDER BY s.sale_date, c.customer_id
-            )
-        AS first_val_disc
-    FROM customers AS c
-    LEFT JOIN sales AS s
-        ON c.customer_id = s.customer_id
-    LEFT JOIN employees AS e
-        ON s.sales_person_id = e.employee_id
-    LEFT JOIN products AS p
-        ON s.product_id = p.product_id
-),
-first_val_disc_table AS (
-    SELECT DISTINCT ON (customer)
-        customer,
-        sale_date,
-        seller
-    FROM initial_table
-    WHERE first_val_disc = 0
-)
-SELECT * FROM first_val_disc_table
-;
+--special_offer
+
+SELECT
+    CONCAT(customers.first_name, ' ', customers.last_name) AS customer,
+    MIN(sales.sale_date) AS sale_date, --use MIN for find first buy
+    CONCAT(employees.first_name, ' ', employees.last_name) AS seller
+FROM sales
+INNER JOIN products ON sales.product_id = products.product_id
+INNER JOIN customers ON sales.customer_id = customers.customer_id
+INNER JOIN employees ON sales.sales_person_id = employees.employee_id
+WHERE products.price = 0 --select promotional goods
+GROUP BY customers.customer_id, customer, seller
+ORDER BY customers.customer_id;
