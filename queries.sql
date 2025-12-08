@@ -28,13 +28,15 @@ WITH per_seller AS (
 ),
 
 overall AS (
-    SELECT AVG(avg_income) AS avg_all FROM per_seller
+    SELECT AVG(avg_income) AS avg_all
+    FROM per_seller
 )
 
 SELECT
     seller,
     FLOOR(avg_income) AS average_income
-FROM per_seller, overall
+FROM per_seller
+cross join overall
 WHERE avg_income < avg_all
 ORDER BY average_income ASC;
 
@@ -68,7 +70,7 @@ FROM (
     GROUP BY age_category
 ) AS t
 ORDER BY
-    CASE t.age_category
+    CASE age_category
         WHEN '16-25' THEN 1
         WHEN '26-40' THEN 2
         WHEN '40+' THEN 3
