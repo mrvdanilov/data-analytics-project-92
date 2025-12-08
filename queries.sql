@@ -35,47 +35,47 @@ ORDER BY average_income ASC
 SELECT
     CONCAT(e.first_name, ' ', e.last_name) AS seller,
     (CASE
-        WHEN extract(
+        WHEN EXTRACT(
             DOW
             FROM s.sale_date
         ) = 1 THEN 'monday'
-        WHEN extract(
+        WHEN EXTRACT(
             DOW
             FROM s.sale_date
         ) = 2 THEN 'tuesday'
-        WHEN extract(
+        WHEN EXTRACT(
             DOW
             FROM s.sale_date
         ) = 3 THEN 'wednesday'
-        WHEN extract(
+        WHEN EXTRACT(
             DOW
             FROM s.sale_date
         ) = 4 THEN 'thursday'
-        WHEN extract(
+        WHEN EXTRACT(
             DOW
             FROM s.sale_date
         ) = 5 THEN 'friday'
-        WHEN extract(
+        WHEN EXTRACT(
             DOW
             FROM s.sale_date
         ) = 6 THEN 'saturday'
-        WHEN extract(
+        WHEN EXTRACT(
             DOW
             FROM s.sale_date
         ) = 0 THEN 'sunday'
     END) AS day_of_week,
-    floor(sum(s.quantity * p.price)) AS income
+    FLOOR(SUM(s.quantity * p.price)) AS income
 FROM sales AS s
 INNER JOIN employees AS e ON s.sales_person_id = e.employee_id
 INNER JOIN products AS p ON s1.product_id = p1.product_id
 GROUP BY
     e.first_name,
     e.last_name,
-    extract(
+    EXTRACT(
         DOW
         FROM s.sale_date
     )
-ORDER BY mod(extract(
+ORDER BY MOD(EXTRACT(
     DOW
     FROM s.sale_date
 )::int + 6, 7),
