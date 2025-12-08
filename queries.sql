@@ -84,7 +84,8 @@ INNER JOIN products AS p ON s.product_id = p.product_id
 GROUP BY TO_CHAR(s.sale_date, 'YYYY-MM')
 ORDER BY TO_CHAR(s.sale_date, 'YYYY-MM');
 
--- Отчёт 3 - Покупатели, чья первая покупка была акционной (товар отпускался по цене 0)
+-- Отчёт 3 - Покупатели, чья первая покупка была акционной 
+--(товар отпускался по цене 0)
 WITH ordered_sales AS (
     SELECT
         s.customer_id,
