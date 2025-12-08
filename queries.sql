@@ -4,7 +4,7 @@ FROM customers;
 
 -- топ 10 продавцов
 SELECT
-    concat(e.first_name, ' ', e.last_name) AS seller,
+    CONCAT(e.first_name, ' ', e.last_name) AS seller,
     COUNT(s.customer_id) AS operations,
     FLOOR(SUM(s.quantity * p.price)) AS income
 FROM sales AS s
@@ -16,7 +16,7 @@ LIMIT 10;
 
 -- продавцы с прибылью ниже среднего
 SELECT
-    concat(e.first_name, ' ', e.last_name) AS seller,
+    CONCAT(e.first_name, ' ', e.last_name) AS seller,
     FLOOR(AVG(s.quantity * p.price)) AS average_income
 FROM sales AS s
 INNER JOIN employees AS e ON s.sales_person_id = e.employee_id
@@ -30,10 +30,10 @@ HAVING
         INNER JOIN products AS p1 ON s.product_id = p.product_id
     )
 ORDER BY average_income ASC
-	
+
 -- по дням недели
 SELECT
-    concat(e.first_name, ' ', e.last_name) AS seller,
+    CONCAT(e.first_name, ' ', e.last_name) AS seller,
     (CASE
         WHEN extract(
             DOW
@@ -80,7 +80,7 @@ ORDER BY mod(extract(
     FROM s.sale_date
 )::int + 6, 7),
 seller
-	
+
 -- группы возрастов
 SELECT
     (CASE
@@ -92,7 +92,7 @@ SELECT
 FROM public.customers
 GROUP BY age_category
 ORDER BY age_category
-	
+
 -- покупатели по месяцам
 SELECT
     to_char(s.sale_date, 'yyyy-mm') AS selling_month,
