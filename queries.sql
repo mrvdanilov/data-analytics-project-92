@@ -28,7 +28,7 @@ HAVING
         FROM sales AS s1
         INNER JOIN products AS p1 ON s1.product_id = p1.product_id
     )
-ORDER BY FLOOR(AVG(p.price * s.quantity)) desc;
+ORDER BY FLOOR(AVG(p.price * s.quantity)) DESC;
 
 -- Выручка по дням недели для каждого продавца
 SELECT
