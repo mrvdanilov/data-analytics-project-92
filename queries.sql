@@ -15,31 +15,20 @@ ORDER BY income DESC
 LIMIT 10;
 
 -- Продавцы с низкой средней выручкой за сделку
--- Продавцы с низкой средней выручкой за сделку
-WITH per_seller AS (
-    SELECT
-        CONCAT(TRIM(e.first_name), ' ', TRIM(e.last_name)) AS seller,
-        SUM(p.price * s.quantity) AS total_income,
-        COUNT(*) AS operations,
-        AVG(p.price * s.quantity) AS avg_income
-    FROM sales AS s
-    INNER JOIN employees AS e ON s.sales_person_id = e.employee_id
-    INNER JOIN products AS p ON s.product_id = p.product_id
-    GROUP BY seller
-),
-
-overall AS (
-    SELECT AVG(avg_income) AS avg_all
-    FROM per_seller
-)
-
 SELECT
-    seller,
-    FLOOR(avg_income) AS average_income
-FROM per_seller
-CROSS JOIN overall
-WHERE avg_income < avg_all
-ORDER BY average_income ASC;
+    CONCAT(TRIM(e.first_name), ' ', TRIM(e.last_name)) AS seller,
+    FLOOR(AVG(p.price * s.quantity)) AS average_income
+FROM sales AS s
+INNER JOIN employees AS e ON s.sales_person_id = e.employee_id
+INNER JOIN products AS p ON s.product_id = p.product_id
+GROUP BY seller
+HAVING
+    AVG(p.price * s.quantity) < (
+        SELECT AVG(p.price * s.quantity)
+        FROM sales AS s
+        INNER JOIN products AS p ON s.product_id = p.product_id
+    )
+ORDER BY FLOOR(AVG(p.price * s.quantity)) DESC
 
 -- Выручка по дням недели для каждого продавца
 SELECT
