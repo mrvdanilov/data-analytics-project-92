@@ -15,6 +15,7 @@ ORDER BY income DESC
 LIMIT 10;
 
 -- Продавцы с низкой средней выручкой за сделку
+-- Продавцы с низкой средней выручкой за сделку
 WITH per_seller AS (
     SELECT
         CONCAT(TRIM(e.first_name), ' ', TRIM(e.last_name)) AS seller,
@@ -36,7 +37,7 @@ SELECT
     seller,
     FLOOR(avg_income) AS average_income
 FROM per_seller
-cross join overall
+CROSS JOIN overall
 WHERE avg_income < avg_all
 ORDER BY average_income ASC;
 
