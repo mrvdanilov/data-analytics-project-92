@@ -25,8 +25,8 @@ GROUP BY seller
 HAVING
     AVG(p.price * s.quantity) < (
         SELECT AVG(p.price * s.quantity)
-        FROM sales AS s
-        INNER JOIN products AS p ON s.product_id = p.product_id
+        FROM sales AS s1
+        INNER JOIN products AS p1 ON s1.product_id = p1.product_id
     )
 ORDER BY FLOOR(AVG(p.price * s.quantity)) DESC
 
