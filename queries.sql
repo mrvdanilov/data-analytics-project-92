@@ -1,4 +1,5 @@
 --noqa: disable=ST06
+
 -- Этот запрос считает общее количество покупателей в таблице customers
 SELECT COUNT(*) AS customers_count
 FROM customers;
@@ -9,10 +10,8 @@ SELECT
     COUNT(*) AS operations,
     FLOOR(SUM(p.price * s.quantity)) AS income
 FROM sales AS s
-INNER JOIN employees AS e 
-ON s.sales_person_id = e.employee_id
-INNER JOIN products AS p 
-ON s.product_id = p.product_id
+INNER JOIN employees AS e ON s.sales_person_id = e.employee_id
+INNER JOIN products AS p ON s.product_id = p.product_id
 GROUP BY seller
 ORDER BY income DESC
 LIMIT 10;
@@ -22,10 +21,8 @@ SELECT
     CONCAT(e.first_name, ' ', e.last_name) AS seller,
     FLOOR(AVG(p.price * s.quantity)) AS average_income
 FROM sales AS s
-INNER JOIN employees AS e 
-ON s.sales_person_id = e.employee_id
-INNER JOIN products AS p 
-ON s.product_id = p.product_id
+INNER JOIN employees AS e ON s.sales_person_id = e.employee_id
+INNER JOIN products AS p ON s.product_id = p.product_id
 GROUP BY seller
 HAVING
     AVG(p.price * s.quantity) < (
@@ -38,10 +35,8 @@ ORDER BY FLOOR(AVG(p.price * s.quantity)) DESC;
 -- Выручка по дням недели для каждого продавца
 SELECT
     CONCAT(TRIM(e.first_name), ' ', TRIM(e.last_name)) AS seller,
-    RTRIM(TO_CHAR(s.sale_date, 'day'))
-	AS day_of_week,
-    FLOOR(SUM(p.price * s.quantity)) 
-	AS income
+    RTRIM(TO_CHAR(s.sale_date, 'day')) AS day_of_week,
+    FLOOR(SUM(p.price * s.quantity)) AS income
 FROM sales AS s
 INNER JOIN employees AS e ON s.sales_person_id = e.employee_id
 INNER JOIN products AS p ON s.product_id = p.product_id
