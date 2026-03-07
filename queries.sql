@@ -113,3 +113,8 @@ INNER JOIN customers AS c ON fs.customer_id = c.customer_id
 INNER JOIN employees AS e ON fs.sales_person_id = e.employee_id
 WHERE p.price = 0
 ORDER BY fs.customer_id;
+
+
+
+
+select 1;
